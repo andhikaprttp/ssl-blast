@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superlink Blast - WhatsApp Broadcast</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- eno , yil , dhik -->
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="app-title">Superlink <span>Blast</span></div>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">
+                <i data-lucide="moon" style="width: 16px; height: 16px;"></i> Mode Gelap
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="desktop-grid">
+            <div class="card">
+                <div class="card-header">
+                    <i data-lucide="file-up"></i>
+                    <span>1. Import CSV Pelanggan</span>
+                </div>
+                <div class="upload-area" id="dropZone" onclick="document.getElementById('csvFileInput').click()">
+                    <i data-lucide="upload-cloud" style="width: 40px; height: 40px; color: var(--primary-orange);"></i>
+                    <p>Unggah File CSV DOKU</p>
+                    <span>Klik atau seret file ke area ini</span>
+                    <input type="file" id="csvFileInput" accept=".csv" />
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i data-lucide="message-square-text"></i>
+                    <span>2. Template Pesan Utama</span>
+                </div>
+                <textarea id="templateText" oninput="renderTable()">Pelanggan Yth *{NAME}*,
+
+Berikut rincian tagihan Anda:
+No. Invoice: {INVOICE}
+Periode: 1 - 31 Agustus 2026
+Total Tagihan: *{AMOUNT}*
+Jatuh Tempo: {DUE_DATE}
+Status: BELUM DIBAYAR
+
+Silakan lakukan pembayaran melalui link berikut:
+{LINK}
+
+Terima kasih.
+Superlink Networks.
+                </textarea>
+                <div class="tag-info">
+                    Tag: <code>{NAME}</code> <code>{INVOICE}</code> <code>{AMOUNT}</code> <code>{DUE_DATE}</code> <code>{LINK}</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i data-lucide="users"></i>
+                <span>3. Konfirmasi & Broadcast</span>
+            </div>
+
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, invoice, no WA..." oninput="onSearchInput()">
+                </div>
+                <div class="stats-badge" id="statsBadge">Total: 0 Pelanggan</div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked style="width: 16px; height: 16px; cursor: pointer;">
+                            </th>
+                            <th>Nama Pelanggan</th>
+                            <th>No. WhatsApp</th>
+                            <th>No. Invoice</th>
+                            <th>Total Tagihan</th>
+                            <th style="text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                Belum ada data. Silakan unggah file CSV DOKU.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container" id="paginationControls">
+                <button class="pagination-btn" id="prevPageBtn" onclick="changePage(-1)">
+                    <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i> Sblm
+                </button>
+                <span class="page-info" id="pageIndicator">Hal 1 dari 1</span>
+                <button class="pagination-btn" id="nextPageBtn" onclick="changePage(1)">
+                    Lnjt <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>Edit Pesan Manual</span>
+                <i data-lucide="x" style="cursor: pointer;" onclick="closeEditModal()"></i>
+            </div>
+            <div>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                    Edit khusus untuk <strong id="editCustomerName" style="color: var(--text-main);"></strong>:
+                </p>
+                <textarea id="editMessageText" style="height: 200px;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-preview" style="margin-right: auto;" onclick="resetDefaultMessage()">Reset</button>
+                <button class="btn btn-preview" onclick="closeEditModal()">Batal</button>
+                <button class="btn btn-send" onclick="saveCustomMessage()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="previewModal">
+        <div class="wa-phone-container">
+            <div class="wa-header">
+                <div class="wa-user-info">
+                    <div class="wa-avatar" id="modalAvatar">S</div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px;" id="modalCustomerName">Pelanggan</div>
+                        <div style="font-size: 11px; opacity: 0.8;" id="modalCustomerPhone">+62 8xx-xxxx-xxxx</div>
+                    </div>
+                </div>
+                <i data-lucide="x" style="cursor: pointer;" onclick="closePreview()"></i>
+            </div>
+            <div class="wa-chat-body">
+                <div class="wa-bubble">
+                    <div id="modalMessageContent"></div>
+                    <div class="wa-time">Saat ini <i data-lucide="check-check" style="width: 14px; height: 14px; color: #53bdeb;"></i></div>
+                </div>
+            </div>
+            <div class="wa-footer">
+                <button class="btn btn-preview" style="flex: 1;" onclick="closePreview()">Tutup</button>
+                <a id="modalSendBtn" href="#" target="_blank" class="btn btn-send" style="flex: 1;">
+                    <i data-lucide="send" style="width: 14px; height: 14px;"></i> Kirim
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

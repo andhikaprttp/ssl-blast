@@ -43,7 +43,8 @@
                     <i data-lucide="message-square-text"></i>
                     <span>2. Template Pesan Utama</span>
                 </div>
-                <textarea id="templateText" oninput="renderTable()">Pelanggan Yth *{NAME}*,
+                <textarea id="templateText" oninput="renderTable()">
+Pelanggan Yth *{NAME}*,
 
 Berikut rincian tagihan Anda:
 No. Invoice: {INVOICE}
@@ -57,6 +58,13 @@ Silakan lakukan pembayaran melalui link berikut:
 
 Terima kasih.
 Superlink Networks.
+#WifiSuper #InternetMasaDepan.
+
+Layanan Pelanggan
+Call Center: *+62 821 3848 3848*
+WhatsApp Chat: *+62 821 3848 3848*
+Email: cs@superlinknetworks.com
+
                 </textarea>
                 <div class="tag-info">
                     Tag: <code>{NAME}</code> <code>{INVOICE}</code> <code>{AMOUNT}</code> <code>{DUE_DATE}</code> <code>{LINK}</code>

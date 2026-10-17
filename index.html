@@ -43,15 +43,28 @@
                     <i data-lucide="message-square-text"></i>
                     <span>2. Template Pesan Utama</span>
                 </div>
+
+                <!-- Kontrol Pemilihan Periode Bulan -->
+                <div class="period-container">
+                    <div class="period-label">
+                        <i data-lucide="calendar" style="width: 16px; height: 16px; color: var(--primary-orange);"></i>
+                        <span>Pilih Periode Tagihan:</span>
+                    </div>
+                    <div class="period-inputs">
+                        <select id="periodMonthSelect" class="select-inline" onchange="renderTable()"></select>
+                        <select id="periodYearSelect" class="select-inline" onchange="renderTable()"></select>
+                    </div>
+                </div>
+
                 <textarea id="templateText" oninput="renderTable()">
 
 Pelanggan Yth *{NAME}*,
 
 Berikut rincian tagihan Anda:
 No. Invoice: {INVOICE}
-Periode: 1 - 31 Agustus 2026
+Periode: {PERIOD}
 Total Tagihan: *{AMOUNT}*
-Jatuh Tempo: 31 Agustus 202
+Jatuh Tempo: {DUE_DATE}
 
 Silakan lakukan pembayaran melalui link berikut:
 {LINK}
@@ -69,7 +82,7 @@ Email: cs@superlinknetworks.com
 
                 </textarea>
                 <div class="tag-info">
-                    Tag: <code>{NAME}</code> <code>{INVOICE}</code> <code>{AMOUNT}</code> <code>{DUE_DATE}</code> <code>{LINK}</code>
+                    Tag: <code>{NAME}</code> <code>{INVOICE}</code> <code>{PERIOD}</code> <code>{AMOUNT}</code> <code>{DUE_DATE}</code> <code>{LINK}</code>
                 </div>
             </div>
         </div>
@@ -173,3 +186,4 @@ Email: cs@superlinknetworks.com
     <script src="script.js"></script>
 </body>
 </html>
+

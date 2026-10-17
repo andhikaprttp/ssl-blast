@@ -1,5 +1,4 @@
-    
-        :root {
+:root {
             --primary-blue: #1e3a8a;
             --primary-orange: #ea580c;
             --surface-color: #ffffff;
@@ -143,6 +142,50 @@
         .upload-area p { margin-top: 10px; font-weight: 500; }
         .upload-area span { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
         #csvFileInput { display: none; }
+
+        /* --- Style Pilihan Periode Bulan & Tahun --- */
+        .period-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .period-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .period-inputs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .select-inline {
+            background: var(--surface-color);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .select-inline:focus {
+            border-color: var(--primary-blue);
+        }
 
         textarea {
             width: 100%;
@@ -440,4 +483,3 @@
             .action-group { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
             .btn { width: 100%; padding: 10px 4px; font-size: 12px; }
         }
-    

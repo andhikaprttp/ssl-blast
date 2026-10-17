@@ -48,14 +48,30 @@ function getSelectedPeriodText() {
 
     if (!monthSelect || !yearSelect) return '1 - 31 Agustus 2026';
 
-    const monthIndex = parseInt(monthSelect.value, 10); // 0 = Januari, 1 = Februari, dst.
+    const monthIndex = parseInt(monthSelect.value, 10);
     const year = parseInt(yearSelect.value, 10);
 
-    // Angka 0 di tanggal berarti mengambil hari terakhir dari bulan sebelumnya (monthIndex + 1)
+    // new Date(year, monthIndex + 1, 0) mengambil tanggal terakhir di bulan yang dipilih
     const lastDay = new Date(year, monthIndex + 1, 0).getDate();
     const monthName = monthNames[monthIndex];
 
     return `1 - ${lastDay} ${monthName} ${year}`;
+}
+
+// Mendapatkan tanggal Jatuh Tempo terformat (misal: "31 Agustus 2026")
+function getSelectedDueDateText() {
+    const monthSelect = document.getElementById('periodMonthSelect');
+    const yearSelect = document.getElementById('periodYearSelect');
+
+    if (!monthSelect || !yearSelect) return '31 Agustus 2026';
+
+    const monthIndex = parseInt(monthSelect.value, 10);
+    const year = parseInt(yearSelect.value, 10);
+
+    const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+    const monthName = monthNames[monthIndex];
+
+    return `${lastDay} ${monthName} ${year}`;
 }
 
 function escapeHTML(str) {
@@ -93,19 +109,21 @@ initPeriodSelectors();
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('csvFileInput');
 
-dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        handleFile(e.dataTransfer.files[0]);
-    }
-});
-fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) handleFile(e.target.files[0]);
-});
+if (dropZone && fileInput) {
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+}
 
 function handleFile(file) {
     if (!file) return;
@@ -171,9 +189,10 @@ function onSearchInput() {
 
 function renderTable() {
     const tbody = document.querySelector('#dataTable tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    const searchTerm = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
     
     const filteredData = parsedData.filter(item => {
         return item.name.toLowerCase().includes(searchTerm) ||
@@ -181,17 +200,20 @@ function renderTable() {
                item.invoice.toLowerCase().includes(searchTerm);
     });
 
-    document.getElementById('statsBadge').innerText = `Total: ${filteredData.length} Pelanggan`;
+    const statsBadge = document.getElementById('statsBadge');
+    if (statsBadge) statsBadge.innerText = `Total: ${filteredData.length} Pelanggan`;
 
     if (filteredData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">Data tidak ditemukan.</td></tr>`;
-        document.getElementById('paginationControls').style.display = 'none';
+        const pagControls = document.getElementById('paginationControls');
+        if (pagControls) pagControls.style.display = 'none';
         return;
     }
 
     let displayData = filteredData;
+    const pagControls = document.getElementById('paginationControls');
     if (isMobile()) {
-        document.getElementById('paginationControls').style.display = 'flex';
+        if (pagControls) pagControls.style.display = 'flex';
         const totalPages = Math.ceil(filteredData.length / mobilePageSize) || 1;
         if (currentPage > totalPages) currentPage = totalPages;
 
@@ -202,7 +224,7 @@ function renderTable() {
         document.getElementById('prevPageBtn').disabled = (currentPage === 1);
         document.getElementById('nextPageBtn').disabled = (currentPage === totalPages);
     } else {
-        document.getElementById('paginationControls').style.display = 'none';
+        if (pagControls) pagControls.style.display = 'none';
     }
 
     displayData.forEach((item) => {
@@ -262,13 +284,14 @@ function toggleSelectAll(master) {
 function generateDefaultMessage(item) {
     let template = document.getElementById('templateText').value;
     const periodStr = getSelectedPeriodText();
+    const dueDateStr = getSelectedDueDateText();
 
     return template
         .replaceAll('{NAME}', item.name)
         .replaceAll('{INVOICE}', item.invoice)
         .replaceAll('{PERIOD}', periodStr)
         .replaceAll('{AMOUNT}', item.amount)
-        .replaceAll('{DUE_DATE}', item.dueDate)
+        .replaceAll('{DUE_DATE}', dueDateStr)
         .replaceAll('{LINK}', item.link);
 }
 
@@ -336,5 +359,12 @@ function closePreview() {
     document.getElementById('previewModal').classList.remove('active');
 }
 
-document.getElementById('previewModal').addEventListener('click', function(e) { if (e.target === this) closePreview(); });
-document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+const previewModal = document.getElementById('previewModal');
+if (previewModal) {
+    previewModal.addEventListener('click', function(e) { if (e.target === this) closePreview(); });
+}
+
+const editModal = document.getElementById('editModal');
+if (editModal) {
+    editModal.addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+}
